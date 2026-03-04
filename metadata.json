@@ -1,0 +1,8 @@
+{
+  "name": "Marketing AdCMS Pro",
+  "description": "An internal CMS for marketing teams to sync ad data from Google Sheets, preview cross-platform ads, and manage the approval workflow.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
