@@ -25,16 +25,29 @@ import {
 import AdPreview from '../components/AdPreview';
 import { BANK_LOGOS } from './AdsList';
 
-// Email Server Config
-const EMAIL_API = 'https://email-server-tv4o.onrender.com';
-
-const sendEmail = async (endpoint: string, body: object) => {
+// --- EMAIL HELPER (Brevo API) ---
+const sendEmail = async (to: string, subject: string, html: string) => {
   try {
-    await fetch(`${EMAIL_API}${endpoint}`, {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': import.meta.env.VITE_BREVO_API_KEY
+      },
+      body: JSON.stringify({
+        sender: {
+          name: 'AdManager',
+          email: import.meta.env.VITE_SENDER_EMAIL
+        },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html
+      })
     });
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('Brevo error:', err);
+    }
   } catch (err) {
     console.error('Send email error:', err);
   }
@@ -183,13 +196,20 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
     try {
       await onUpdate(updatedAd);
       const recipientEmail = ad.ownerEmail || `${ad.owner}@gmail.com`;
-      await sendEmail('/api/send-comment', {
-        to: recipientEmail,
-        ownerName: ad.owner,
-        adName: ad.adName,
-        fieldName: field,
-        comment: commentText
-      });
+      await sendEmail(
+        recipientEmail,
+        `⚠️ Góp ý cho quảng cáo "${ad.adName}"`,
+        `<div style="font-family:sans-serif;max-width:500px;margin:auto">
+          <h2 style="color:#dc2626">⚠️ Có góp ý cho quảng cáo của bạn</h2>
+          <p>Xin chào <b>${ad.owner}</b>,</p>
+          <p>Mẫu quảng cáo <b>"${ad.adName}"</b> cần chỉnh sửa:</p>
+          <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:12px;border-radius:4px">
+            <p style="margin:0"><b>Trường:</b> ${field}</p>
+            <p style="margin:8px 0 0"><b>Góp ý:</b> ${commentText}</p>
+          </div>
+          <p style="color:#64748b;font-size:12px">AdManager System</p>
+        </div>`
+      );
       setCommentText('');
       setActiveCommentField(null);
     } finally {
@@ -226,11 +246,16 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
         setToastMessage({ title: 'Đã phê duyệt!', sub: `Đang gửi email tới ${recipientEmail}...` });
         setShowToast(true);
 
-        await sendEmail('/api/send-approval', {
-          to: recipientEmail,
-          ownerName: ad.owner,
-          adName: ad.adName
-        });
+        await sendEmail(
+          recipientEmail,
+          `✅ Quảng cáo "${ad.adName}" đã được phê duyệt`,
+          `<div style="font-family:sans-serif;max-width:500px;margin:auto">
+            <h2 style="color:#4f46e5">✅ Quảng cáo đã được duyệt!</h2>
+            <p>Xin chào <b>${ad.owner}</b>,</p>
+            <p>Mẫu quảng cáo <b>"${ad.adName}"</b> của bạn đã được phê duyệt.</p>
+            <p style="color:#64748b;font-size:12px">AdManager System</p>
+          </div>`
+        );
 
         setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
         setTimeout(() => setShowToast(false), 8000);
@@ -271,7 +296,6 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
       )}
 
       <div className="flex h-full">
-        {/* SIDEBAR */}
         <aside className="w-72 border-r border-slate-100 bg-white flex flex-col p-5 overflow-y-auto scrollbar-hide shrink-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
           <div className="flex items-center gap-3 mb-6">
             <Link to="/ads" className="p-2 -ml-2 text-slate-400 hover:bg-slate-50 rounded-lg transition-colors"><ArrowLeft size={18} /></Link>
@@ -326,7 +350,6 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
           </section>
         </aside>
 
-        {/* MAIN CONTENT */}
         <div className="flex-1 bg-[#fcfcfd] overflow-y-auto p-6 scrollbar-hide">
           <div className="max-w-6xl mx-auto space-y-6">
             <div className="flex items-center justify-between sticky top-0 bg-[#fcfcfd]/90 backdrop-blur-md py-3 z-40 border-b border-slate-100 -mx-4 px-4 mb-2">
