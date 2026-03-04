@@ -16,17 +16,17 @@ import {
   X,
   Send
 } from 'lucide-react';
-import { Ad, AdStatus, AdPlatform } from './types';
-import { supabase } from './supabase';
+import { Ad, AdStatus, AdPlatform } from '@/types';
+import { supabase } from '@/supabase';
 import { User } from '@supabase/supabase-js';
 
 // Components
-import Auth from './components/Auth';
-import Dashboard from './pages/Dashboard';
-import AdsList from './pages/AdsList';
-import AdDetail from './pages/AdDetail';
-import Timeline from './pages/Timeline';
-import CreateAdModal from './components/CreateAdModal';
+import Auth from '@/components/Auth';
+import Dashboard from '@/pages/Dashboard';
+import AdsList from '@/pages/AdsList';
+import AdDetail from '@/pages/AdDetail';
+import Timeline from '@/pages/Timeline';
+import CreateAdModal from '@/components/CreateAdModal';
 
 const App: React.FC = () => {
   const [ads, setAds] = useState<Ad[]>([]);

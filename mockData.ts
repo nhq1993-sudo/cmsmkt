@@ -1,5 +1,5 @@
 
-import { Ad, AdStatus, AdPlatform } from './types';
+import { Ad, AdStatus, AdPlatform } from '@/types';
 
 export const MOCK_ADS: Ad[] = [
   {
