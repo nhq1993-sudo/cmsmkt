@@ -23,6 +23,12 @@ export default defineConfig(({ mode }) => {
           '@': path.resolve(__dirname, './src'),
         },
         extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json']
+      },
+      build: {
+        sourcemap: false,
+        rollupOptions: {
+          maxParallelFileOps: 2
+        }
       }
     };
 });
