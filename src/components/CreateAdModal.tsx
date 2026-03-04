@@ -10,7 +10,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { Ad, AdPlatform, AdStatus, Comment } from '@/types';
-import AdPreview from './AdPreview.tsx';
+import AdPreview from './AdPreview';
 
 // --- SUB-COMPONENTS ---
 

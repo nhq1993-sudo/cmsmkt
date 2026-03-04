@@ -21,12 +21,12 @@ import { supabase } from '@/supabase';
 import { User } from '@supabase/supabase-js';
 
 // Components
-import Auth from '@/components/Auth.tsx';
-import Dashboard from '@/pages/Dashboard.tsx';
-import AdsList from '@/pages/AdsList.tsx';
-import AdDetail from '@/pages/AdDetail.tsx';
-import Timeline from '@/pages/Timeline.tsx';
-import CreateAdModal from '@/components/CreateAdModal.tsx';
+import Auth from '@/components/Auth';
+import Dashboard from '@/pages/Dashboard';
+import AdsList from '@/pages/AdsList';
+import AdDetail from '@/pages/AdDetail';
+import Timeline from '@/pages/Timeline';
+import CreateAdModal from '@/components/CreateAdModal';
 
 const App: React.FC = () => {
   const [ads, setAds] = useState<Ad[]>([]);
