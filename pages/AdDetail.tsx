@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Ad, AdStatus, Comment, AdPlatform } from '@/types';
@@ -25,6 +24,13 @@ import {
 } from 'lucide-react';
 import AdPreview from '../components/AdPreview';
 import { BANK_LOGOS } from './AdsList';
+import emailjs from '@emailjs/browser';
+
+// EmailJS Config
+const EMAILJS_SERVICE_ID = 'service_7v8ib6k';
+const EMAILJS_TEMPLATE_APPROVAL = 'template_j4nlquh';
+const EMAILJS_TEMPLATE_COMMENT = 'template_7pl3z89';
+const EMAILJS_PUBLIC_KEY = 'voSU_6wLKS5X2JNKv';
 
 // --- SUB-COMPONENTS ---
 
@@ -169,19 +175,21 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
     try {
       await onUpdate(updatedAd);
       
-      // Gửi email thông báo comment mới
-      fetch('/api/send-comment-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          adName: ad.adName, 
-          owner: ad.owner,
-          ownerEmail: ad.ownerEmail,
-          fieldName: field,
+      // Gửi email comment qua EmailJS
+      const recipientEmail = ad.ownerEmail || `${ad.owner}@gmail.com`;
+      emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_COMMENT,
+        {
+          to_email: recipientEmail,
+          owner_name: ad.owner,
+          ad_name: ad.adName,
+          field_name: field,
           comment: commentText,
-          reviewer: 'Reviewer' // Có thể thay bằng tên user hiện tại nếu có
-        })
-      }).catch(err => console.error('Comment Email Error:', err));
+          reviewer: 'Reviewer'
+        },
+        EMAILJS_PUBLIC_KEY
+      ).catch(err => console.error('EmailJS comment error:', err));
 
       setCommentText('');
       setActiveCommentField(null);
@@ -216,30 +224,25 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
       await onUpdate(updatedAd);
       if (newStatus === AdStatus.APPROVED) {
         const recipientEmail = ad.ownerEmail || `${ad.owner}@gmail.com`;
-        setToastMessage({ title: 'Đã phê duyệt!', sub: `Đang gửi email thông báo tới ${recipientEmail}...` });
+        setToastMessage({ title: 'Đã phê duyệt!', sub: `Đang gửi email tới ${recipientEmail}...` });
         setShowToast(true);
 
-        // Gọi API gửi email
-        fetch('/api/send-approval-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            adName: ad.adName, 
-            owner: ad.owner,
-            ownerEmail: ad.ownerEmail 
-          })
-        }).then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
-            } else {
-              setToastMessage({ title: 'Lưu ý', sub: data.message });
-            }
-          })
-          .catch(err => {
-            console.error('Email API Error:', err);
-            setToastMessage({ title: 'Lỗi gửi mail', sub: 'Không thể kết nối tới server email.' });
-          });
+        // Gửi email duyệt qua EmailJS
+        emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_APPROVAL,
+          {
+            to_email: recipientEmail,
+            owner_name: ad.owner,
+            ad_name: ad.adName,
+          },
+          EMAILJS_PUBLIC_KEY
+        ).then(() => {
+          setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
+        }).catch(err => {
+          console.error('EmailJS approval error:', err);
+          setToastMessage({ title: 'Lỗi gửi mail', sub: 'Không thể gửi email thông báo.' });
+        });
 
         setTimeout(() => setShowToast(false), 8000);
       } else if (newStatus === AdStatus.REJECTED) {
