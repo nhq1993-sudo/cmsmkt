@@ -24,13 +24,21 @@ import {
 } from 'lucide-react';
 import AdPreview from '../components/AdPreview';
 import { BANK_LOGOS } from './AdsList';
-import emailjs from '@emailjs/browser';
 
-// EmailJS Config
-const EMAILJS_SERVICE_ID = 'service_7v8ib6k';
-const EMAILJS_TEMPLATE_APPROVAL = 'template_j4nlquh';
-const EMAILJS_TEMPLATE_COMMENT = 'template_7pl3z89';
-const EMAILJS_PUBLIC_KEY = 'voSU_6wLKS5X2JNKv';
+// Email Server Config
+const EMAIL_API = 'https://email-server-tv4o.onrender.com';
+
+const sendEmail = async (endpoint: string, body: object) => {
+  try {
+    await fetch(`${EMAIL_API}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  } catch (err) {
+    console.error('Send email error:', err);
+  }
+};
 
 // --- SUB-COMPONENTS ---
 
@@ -174,23 +182,14 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
     };
     try {
       await onUpdate(updatedAd);
-      
-      // Gửi email comment qua EmailJS
       const recipientEmail = ad.ownerEmail || `${ad.owner}@gmail.com`;
-      emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_COMMENT,
-        {
-          to_email: recipientEmail,
-          owner_name: ad.owner,
-          ad_name: ad.adName,
-          field_name: field,
-          comment: commentText,
-          reviewer: 'Reviewer'
-        },
-        EMAILJS_PUBLIC_KEY
-      ).catch(err => console.error('EmailJS comment error:', err));
-
+      await sendEmail('/api/send-comment', {
+        to: recipientEmail,
+        ownerName: ad.owner,
+        adName: ad.adName,
+        fieldName: field,
+        comment: commentText
+      });
       setCommentText('');
       setActiveCommentField(null);
     } finally {
@@ -227,23 +226,13 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
         setToastMessage({ title: 'Đã phê duyệt!', sub: `Đang gửi email tới ${recipientEmail}...` });
         setShowToast(true);
 
-        // Gửi email duyệt qua EmailJS
-        emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_APPROVAL,
-          {
-            to_email: recipientEmail,
-            owner_name: ad.owner,
-            ad_name: ad.adName,
-          },
-          EMAILJS_PUBLIC_KEY
-        ).then(() => {
-          setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
-        }).catch(err => {
-          console.error('EmailJS approval error:', err);
-          setToastMessage({ title: 'Lỗi gửi mail', sub: 'Không thể gửi email thông báo.' });
+        await sendEmail('/api/send-approval', {
+          to: recipientEmail,
+          ownerName: ad.owner,
+          adName: ad.adName
         });
 
+        setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
         setTimeout(() => setShowToast(false), 8000);
       } else if (newStatus === AdStatus.REJECTED) {
         navigate('/ads');
