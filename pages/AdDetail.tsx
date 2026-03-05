@@ -2,58 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Ad, AdStatus, Comment, AdPlatform } from '@/types';
 import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  Globe,
-  Wallet,
-  Eye,
-  FileText,
-  Loader2,
-  Target,
-  Clock,
-  Layers,
-  User,
-  ExternalLink as ExternalLinkIcon,
-  Smartphone,
-  AlertTriangle,
-  History,
-  MessageSquare,
-  AlertCircle,
-  Send,
-  Mail
+  ArrowLeft, CheckCircle2, Globe, Wallet, Eye, FileText, Loader2,
+  Target, Clock, Layers, User, ExternalLink as ExternalLinkIcon,
+  Smartphone, AlertTriangle, History, MessageSquare, AlertCircle, Send, Mail
 } from 'lucide-react';
 import AdPreview from '../components/AdPreview';
 import { BANK_LOGOS } from './AdsList';
-
-// --- EMAIL HELPER (Brevo API) ---
-const sendEmail = async (to: string, subject: string, html: string) => {
-  try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'api-key': import.meta.env.VITE_BREVO_API_KEY
-      },
-      body: JSON.stringify({
-        sender: {
-          name: 'AdManager',
-          email: import.meta.env.VITE_SENDER_EMAIL
-        },
-        to: [{ email: to }],
-        subject,
-        htmlContent: html
-      })
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      console.error('Brevo error:', err);
-    }
-  } catch (err) {
-    console.error('Send email error:', err);
-  }
-};
-
-// --- SUB-COMPONENTS ---
 
 const SidebarSectionHeader = ({ label, icon: Icon }: { label: string, icon: any }) => (
   <h3 className="text-[10px] font-extrabold text-indigo-600 uppercase tracking-widest mb-2.5 flex items-center gap-2 border-b border-indigo-50 pb-1">
@@ -83,12 +37,8 @@ const ClickableContentItem = ({
             {activeComment && <AlertCircle size={10} className="text-rose-500" />}
           </p>
           {finalLink ? (
-            <a 
-              href={finalLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`flex items-center gap-1 transition-colors group/link ${large ? 'text-lg' : 'text-[12px]'} ${isBold ? 'font-extrabold' : 'font-semibold'} text-indigo-600 hover:text-indigo-800 underline decoration-indigo-200 underline-offset-2 w-fit max-w-full`}
-            >
+            <a href={finalLink} target="_blank" rel="noopener noreferrer"
+              className={`flex items-center gap-1 transition-colors group/link ${large ? 'text-lg' : 'text-[12px]'} ${isBold ? 'font-extrabold' : 'font-semibold'} text-indigo-600 hover:text-indigo-800 underline decoration-indigo-200 underline-offset-2 w-fit max-w-full`}>
               <span className="break-all whitespace-pre-wrap leading-tight">{customText || value}</span>
               <ExternalLinkIcon size={large ? 14 : 10} className="flex-shrink-0 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
             </a>
@@ -103,12 +53,9 @@ const ClickableContentItem = ({
             </div>
           )}
         </div>
-
         {!isApproved && field && (
-          <button 
-            onClick={() => onToggleEdit(field)}
-            className={`p-1 rounded-lg transition-all shrink-0 ${isEditing ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover/field:opacity-100'}`}
-          >
+          <button onClick={() => onToggleEdit(field)}
+            className={`p-1 rounded-lg transition-all shrink-0 ${isEditing ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 opacity-0 group-hover/field:opacity-100'}`}>
             <MessageSquare size={12} />
           </button>
         )}
@@ -116,7 +63,7 @@ const ClickableContentItem = ({
 
       {isEditing && (
         <div className="mt-2 flex gap-1.5 animate-in slide-in-from-top-1">
-          <input 
+          <input
             className="flex-1 bg-white border border-indigo-200 rounded-lg px-2 py-1 text-[10px] outline-none focus:ring-2 focus:ring-indigo-100 font-bold text-slate-900 placeholder:text-slate-400"
             placeholder="Ghi chú lỗi..."
             value={commentText}
@@ -124,10 +71,7 @@ const ClickableContentItem = ({
             onKeyDown={(e) => e.key === 'Enter' && onAddComment(field)}
             autoFocus
           />
-          <button 
-            onClick={() => onAddComment(field)}
-            className="bg-indigo-600 text-white p-1 rounded-lg hover:bg-indigo-700 transition-colors"
-          >
+          <button onClick={() => onAddComment(field)} className="bg-indigo-600 text-white p-1 rounded-lg hover:bg-indigo-700 transition-colors">
             <Send size={12} />
           </button>
         </div>
@@ -135,25 +79,20 @@ const ClickableContentItem = ({
 
       {activeComment && !isEditing && (
         <div className="mt-1.5 bg-white border border-rose-100 rounded-lg p-1.5 shadow-sm flex items-start justify-between gap-2 animate-in fade-in">
-           <div className="flex gap-1.5">
-              <div className="mt-0.5 shrink-0"><MessageSquare size={10} className="text-rose-500" /></div>
-              <p className="text-[10px] font-bold text-rose-600 leading-tight">{activeComment.text}</p>
-           </div>
-           {!isApproved && (
-             <button 
-               onClick={() => onResolveComment(activeComment.id)}
-               className="text-[9px] font-black uppercase text-slate-400 hover:text-emerald-600 shrink-0"
-             >
-               Xong
-             </button>
-           )}
+          <div className="flex gap-1.5">
+            <div className="mt-0.5 shrink-0"><MessageSquare size={10} className="text-rose-500" /></div>
+            <p className="text-[10px] font-bold text-rose-600 leading-tight">{activeComment.text}</p>
+          </div>
+          {!isApproved && (
+            <button onClick={() => onResolveComment(activeComment.id)} className="text-[9px] font-black uppercase text-slate-400 hover:text-emerald-600 shrink-0">
+              Xong
+            </button>
+          )}
         </div>
       )}
     </div>
   );
 };
-
-// --- MAIN COMPONENT ---
 
 interface Props {
   ads: Ad[];
@@ -164,11 +103,10 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const ad = ads.find(a => a.id === id);
-  
+
   const [showToast, setShowToast] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState({ title: '', sub: '' });
-
   const [activeCommentField, setActiveCommentField] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
 
@@ -184,7 +122,7 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
       id: `cmt_${Date.now()}`,
       author: 'Reviewer',
       text: commentText,
-      field: field,
+      field,
       timestamp: new Date().toISOString(),
       resolved: false
     };
@@ -195,21 +133,18 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
     };
     try {
       await onUpdate(updatedAd);
-      const recipientEmail = ad.ownerEmail || `${ad.owner}@gmail.com`;
-      await sendEmail(
-        recipientEmail,
-        `⚠️ Góp ý cho quảng cáo "${ad.adName}"`,
-        `<div style="font-family:sans-serif;max-width:500px;margin:auto">
-          <h2 style="color:#dc2626">⚠️ Có góp ý cho quảng cáo của bạn</h2>
-          <p>Xin chào <b>${ad.owner}</b>,</p>
-          <p>Mẫu quảng cáo <b>"${ad.adName}"</b> cần chỉnh sửa:</p>
-          <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:12px;border-radius:4px">
-            <p style="margin:0"><b>Trường:</b> ${field}</p>
-            <p style="margin:8px 0 0"><b>Góp ý:</b> ${commentText}</p>
-          </div>
-          <p style="color:#64748b;font-size:12px">AdManager System</p>
-        </div>`
-      );
+      fetch('/api/send-comment-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adName: ad.adName,
+          owner: ad.owner,
+          ownerEmail: ad.ownerEmail,
+          fieldName: field,
+          comment: commentText,
+          reviewer: 'Reviewer'
+        })
+      }).catch(err => console.error('Comment email error:', err));
       setCommentText('');
       setActiveCommentField(null);
     } finally {
@@ -223,19 +158,15 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
       ...ad,
       comments: ad.comments.map(c => c.id === commentId ? { ...c, resolved: true } : c)
     };
-    try {
-      await onUpdate(updatedAd);
-    } finally {
-      setIsUpdating(false);
-    }
+    try { await onUpdate(updatedAd); } finally { setIsUpdating(false); }
   };
 
   const handleStatusChange = async (newStatus: AdStatus) => {
     if (isUpdating || (ad.status === AdStatus.APPROVED && newStatus === AdStatus.APPROVED)) return;
     setIsUpdating(true);
-    const updatedAd: Ad = { 
-      ...ad, 
-      status: newStatus, 
+    const updatedAd: Ad = {
+      ...ad,
+      status: newStatus,
       lastUpdated: new Date().toISOString(),
       version: ad.version + 1
     };
@@ -245,19 +176,19 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
         const recipientEmail = ad.ownerEmail || `${ad.owner}@gmail.com`;
         setToastMessage({ title: 'Đã phê duyệt!', sub: `Đang gửi email tới ${recipientEmail}...` });
         setShowToast(true);
-
-        await sendEmail(
-          recipientEmail,
-          `✅ Quảng cáo "${ad.adName}" đã được phê duyệt`,
-          `<div style="font-family:sans-serif;max-width:500px;margin:auto">
-            <h2 style="color:#4f46e5">✅ Quảng cáo đã được duyệt!</h2>
-            <p>Xin chào <b>${ad.owner}</b>,</p>
-            <p>Mẫu quảng cáo <b>"${ad.adName}"</b> của bạn đã được phê duyệt.</p>
-            <p style="color:#64748b;font-size:12px">AdManager System</p>
-          </div>`
-        );
-
-        setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
+        fetch('/api/send-approval-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adName: ad.adName, owner: ad.owner, ownerEmail: ad.ownerEmail })
+        }).then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              setToastMessage({ title: 'Thành công!', sub: `Đã gửi email tới ${recipientEmail}` });
+            } else {
+              setToastMessage({ title: 'Lưu ý', sub: data.message || 'Lỗi gửi email' });
+            }
+          })
+          .catch(() => setToastMessage({ title: 'Lỗi', sub: 'Không thể gửi email.' }));
         setTimeout(() => setShowToast(false), 8000);
       } else if (newStatus === AdStatus.REJECTED) {
         navigate('/ads');
@@ -268,19 +199,12 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
   };
 
   const handleToggleEdit = (field: string) => {
-    if (activeCommentField === field) {
-      setActiveCommentField(null);
-      setCommentText('');
-    } else {
-      setActiveCommentField(field);
-      setCommentText('');
-    }
+    if (activeCommentField === field) { setActiveCommentField(null); setCommentText(''); }
+    else { setActiveCommentField(field); setCommentText(''); }
   };
 
   const openPreview = () => {
-    if (ad.content.previewLink) {
-      window.open(ad.content.previewLink, '_blank', 'noopener,noreferrer');
-    }
+    if (ad.content.previewLink) window.open(ad.content.previewLink, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -302,12 +226,11 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
             <div className="bg-indigo-600 p-2 rounded-lg text-white shadow-sm"><Smartphone size={16} /></div>
             <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight leading-none">AdManager</h2>
           </div>
-
           <section className="mb-6">
             <SidebarSectionHeader label="KÊNH & PHÂN PHỐI" icon={Globe} />
             <div className="grid grid-cols-2 gap-1.5 mb-2">
-               <ClickableContentItem label="KÊNH" value={ad.platform} field="platform" compact activeComment={unresolvedComments.find(c => c.field === 'platform')} isEditing={activeCommentField === 'platform'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
-               <ClickableContentItem label="HÌNH THỨC" value={ad.adObjective} field="adObjective" compact activeComment={unresolvedComments.find(c => c.field === 'adObjective')} isEditing={activeCommentField === 'adObjective'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
+              <ClickableContentItem label="KÊNH" value={ad.platform} field="platform" compact activeComment={unresolvedComments.find(c => c.field === 'platform')} isEditing={activeCommentField === 'platform'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
+              <ClickableContentItem label="HÌNH THỨC" value={ad.adObjective} field="adObjective" compact activeComment={unresolvedComments.find(c => c.field === 'adObjective')} isEditing={activeCommentField === 'adObjective'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
             </div>
             <div className="space-y-1.5">
               <ClickableContentItem label="TÀI KHOẢN QC" value={ad.account} field="account" compact activeComment={unresolvedComments.find(c => c.field === 'account')} isEditing={activeCommentField === 'account'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
@@ -315,7 +238,6 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
               <ClickableContentItem label="ĐỐI TÁC" value={ad.partnerBank} field="partnerBank" compact activeComment={unresolvedComments.find(c => c.field === 'partnerBank')} isEditing={activeCommentField === 'partnerBank'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
             </div>
           </section>
-
           <section className="mb-6">
             <SidebarSectionHeader label="NHẮM MỤC TIÊU" icon={Target} />
             <div className="space-y-1.5">
@@ -331,7 +253,6 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
               <ClickableContentItem label="CHI TIẾT" value={ad.targetAudience.detailedTargeting || '---'} field="targetAudience.detailedTargeting" compact activeComment={unresolvedComments.find(c => c.field === 'targetAudience.detailedTargeting')} isEditing={activeCommentField === 'targetAudience.detailedTargeting'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
             </div>
           </section>
-
           <section className="mb-6">
             <SidebarSectionHeader label="NGÂN SÁCH & LỊCH" icon={Wallet} />
             <div className="mb-2.5 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 flex items-center justify-between">
@@ -399,27 +320,22 @@ const AdDetail: React.FC<Props> = ({ ads, onUpdate }) => {
                   <ClickableContentItem label="MEDIA SOURCE" value={ad.content.mediaUrl} customText={ad.content.mediaUrl ? "Mở link media" : undefined} icon={Eye} field="content.mediaUrl" activeComment={unresolvedComments.find(c => c.field === 'content.mediaUrl')} isEditing={activeCommentField === 'mediaUrl'} isApproved={isApproved} onToggleEdit={handleToggleEdit} onCommentChange={setCommentText} onAddComment={handleAddComment} onResolveComment={handleResolveComment} commentText={commentText} />
                 </div>
               </div>
-
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white rounded-[24px] p-4 border border-slate-100 shadow-sm relative overflow-hidden h-fit">
                   <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 mb-3"><div className="bg-rose-50 p-1 rounded-lg text-rose-600"><Eye size={14} /></div> AD PREVIEW</h3>
                   <div className="relative overflow-hidden rounded-xl border border-slate-100 shadow-inner bg-black/5">
                     {ad.content.previewLink ? (
                       <div className="relative group/overlay cursor-pointer" onClick={openPreview}>
-                         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 group-hover/overlay:bg-black/40 transition-all opacity-0 group-hover/overlay:opacity-100">
-                            <div className="bg-white px-4 py-2 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/overlay:translate-y-0 transition-all ring-4 ring-indigo-500/10">
-                               <ExternalLinkIcon size={14} className="text-indigo-600" />
-                               <span className="text-[10px] font-black text-slate-900 uppercase">Mở Preview Ads</span>
-                            </div>
-                         </div>
-                         <div className="origin-top scale-[0.98]">
-                            <AdPreview ad={ad} />
-                         </div>
+                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/0 group-hover/overlay:bg-black/40 transition-all opacity-0 group-hover/overlay:opacity-100">
+                          <div className="bg-white px-4 py-2 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-2 group-hover/overlay:translate-y-0 transition-all ring-4 ring-indigo-500/10">
+                            <ExternalLinkIcon size={14} className="text-indigo-600" />
+                            <span className="text-[10px] font-black text-slate-900 uppercase">Mở Preview Ads</span>
+                          </div>
+                        </div>
+                        <div className="origin-top scale-[0.98]"><AdPreview ad={ad} /></div>
                       </div>
                     ) : (
-                      <div className="origin-top scale-[0.98]">
-                         <AdPreview ad={ad} />
-                      </div>
+                      <div className="origin-top scale-[0.98]"><AdPreview ad={ad} /></div>
                     )}
                   </div>
                 </div>
