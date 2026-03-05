@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build",
-    "start": "NODE_ENV=production ./node_modules/.bin/tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=esm --outfile=server-prod.js --external:vite --external:express --external:nodemailer --external:cors --external:dotenv",
+    "start": "NODE_ENV=production node server-prod.js",
     "lint": "tsc --noEmit",
     "preview": "vite preview"
   },
@@ -34,6 +34,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.14.0",
-    "@types/nodemailer": "^7.0.11"
+    "@types/nodemailer": "^7.0.11",
+    "esbuild": "^0.27.3"
   }
 }
